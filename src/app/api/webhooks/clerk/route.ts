@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { env } from '@/data/env/server'
 import { createUserSubscription } from '@/server/db/subscription'
+import { deleteUser } from '@/server/db/users'
 
 export async function POST(req: Request) {
   const headerPayload = await headers()
@@ -43,6 +44,12 @@ export async function POST(req: Request) {
             tier: "Free" 
         })
         break
+    }
+    case "user.deleted": {
+      if (event.data.id != null) {
+        await deleteUser(event.data.id)
+        // TODO: Delete user from Stripe
+      }
     }
   }
 
