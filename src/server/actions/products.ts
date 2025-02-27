@@ -106,7 +106,7 @@ export async function updateProductCustomization(
 ) {
     const { userId } = await auth()
     const { success, data } = productCustomizationsSchema.safeParse(unsafeData)
-    const canCustomize = await canCustomizeBanner(userId) || true
+    const canCustomize = await canCustomizeBanner(userId)
 
     if (!success || userId == null || !canCustomize) {
         return { error: true, message: "There was an error saving your customizations" }

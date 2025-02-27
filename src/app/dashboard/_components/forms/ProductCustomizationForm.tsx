@@ -1,6 +1,7 @@
 "use client"
 
 import Banner from "@/components/Banner"
+import { NoPermissionCard } from "@/components/NoPermissionCard"
 import { RequiredLabelIcon } from "@/components/RequiredLabelIcon"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -57,16 +58,23 @@ export function ProductCustomizationForm({
 
     return (
         <>
-            <Banner 
-                message={formValues.locationMessage}
-                mappings={{
-                    country: "United States",
-                    coupon: "SUMMER",
-                    discount: "20"
-                }}
-                customization={formValues}
-                canRemoveBranding={canRemoveBranding}
-            />
+            <div>
+                <Banner 
+                    message={formValues.locationMessage}
+                    mappings={{
+                        country: "United States",
+                        coupon: "SUMMER",
+                        discount: "20"
+                    }}
+                    customization={formValues}
+                    canRemoveBranding={canRemoveBranding}
+                />
+            </div>
+            {!canCustomizeBanner && (
+                <div className="mt-8">
+                    <NoPermissionCard />
+                </div>
+            )}
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
