@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress"
 import { subscriptionTiers, subscriptionTiersInOrder, TierNames } from "@/data/subscriptionTiers"
 import { formatCompactNumber } from "@/lib/formatters"
 import { cn } from "@/lib/utils"
+import { createCancelSession, createCheckoutSession, createCustomerPortalSession } from "@/server/actions/stripe"
 import { getProductCount } from "@/server/db/products"
 import { getProductViewCount } from "@/server/db/productViews"
 import { getUserSubscriptionTier } from "@/server/db/subscription"
@@ -48,7 +49,7 @@ export default async function SubscriptionPage() {
                         </CardContent>
                     </Card>
                 </div>
-                {tier == subscriptionTiers.Free && (
+                {tier != subscriptionTiers.Free && (
                     <Card>
                         <CardHeader>
                             <CardTitle>You are currently on the {tier.name} plan</CardTitle>
@@ -57,8 +58,7 @@ export default async function SubscriptionPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {/* <form action={createCustomerPortalSession}> */}
-                            <form action={undefined}>
+                            <form action={createCustomerPortalSession}>
                                 <Button variant="accent" className="text-lg rounded-lg" size="lg">
                                     Manage Subscription
                                 </Button>
@@ -102,10 +102,9 @@ function PricingCard({
             <CardContent>
                 <form
                     action={
-                        // name === "Free"
-                        //     ? createCancelSession
-                        //     : createCheckoutSession.bind(null, name)
-                        undefined
+                        name === "Free"
+                            ? createCancelSession
+                            : createCheckoutSession.bind(null, name)
                     }
                 >
                     <Button
