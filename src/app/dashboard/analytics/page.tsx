@@ -1,9 +1,10 @@
 import { HasPermission } from "@/components/HasPermission"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CHART_INTERVALS, getViewsByCountryChartData } from "@/server/db/productViews"
+import { CHART_INTERVALS, getViewsByCountryChartData, getViewsByPPPChartData } from "@/server/db/productViews"
 import { canAccessAnalytics } from "@/server/permissions"
 import { auth } from "@clerk/nextjs/server"
 import { ViewsByCountryChart } from "../_components/charts/ViewsByCountryChart"
+import { ViewsByPPPChart } from "../_components/charts/ViewsByPPPChart"
 
 export default async function AnalyticsPage({
     searchParams
@@ -27,7 +28,7 @@ export default async function AnalyticsPage({
             <HasPermission permission={canAccessAnalytics} renderFallback>
                 <div className="flex flex-col gap-8">
                     <ViewsByDayCard />
-                    <ViewsByPPPCard />
+                    <ViewsByPPPCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
                     <ViewsByCountryCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
                 </div>
             </HasPermission>
@@ -53,9 +54,9 @@ async function ViewsByDayCard(
 }
 
 async function ViewsByPPPCard(
-    // props: Parameters<typeof getViewsByPPPChartData>[0]
+    props: Parameters<typeof getViewsByPPPChartData>[0]
 ) {
-    // const chartData = await getViewsByPPPChartData(props)
+    const chartData = await getViewsByPPPChartData(props)
 
     return (
         <Card>
@@ -63,7 +64,7 @@ async function ViewsByPPPCard(
                 <CardTitle>Visitors Per PPP Group</CardTitle>
             </CardHeader>
             <CardContent>
-                {/* <ViewsByPPPChart chartData={chartData} /> */}
+                <ViewsByPPPChart chartData={chartData} />
             </CardContent>
         </Card>
     )
