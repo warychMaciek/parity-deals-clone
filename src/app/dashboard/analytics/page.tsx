@@ -1,10 +1,11 @@
 import { HasPermission } from "@/components/HasPermission"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CHART_INTERVALS, getViewsByCountryChartData, getViewsByPPPChartData } from "@/server/db/productViews"
+import { CHART_INTERVALS, getViewsByCountryChartData, getViewsByDayChartData, getViewsByPPPChartData } from "@/server/db/productViews"
 import { canAccessAnalytics } from "@/server/permissions"
 import { auth } from "@clerk/nextjs/server"
 import { ViewsByCountryChart } from "../_components/charts/ViewsByCountryChart"
 import { ViewsByPPPChart } from "../_components/charts/ViewsByPPPChart"
+import { ViewsByDayChart } from "../_components/charts/ViewsByDayChart"
 
 export default async function AnalyticsPage({
     searchParams
@@ -27,7 +28,7 @@ export default async function AnalyticsPage({
             <h1 className="text-3xl font-semibold">Analytics</h1>
             <HasPermission permission={canAccessAnalytics} renderFallback>
                 <div className="flex flex-col gap-8">
-                    <ViewsByDayCard />
+                    <ViewsByDayCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
                     <ViewsByPPPCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
                     <ViewsByCountryCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
                 </div>
@@ -37,9 +38,9 @@ export default async function AnalyticsPage({
 }
 
 async function ViewsByDayCard(
-    // props: Parameters<typeof getViewsByDayChartData>[0]
+    props: Parameters<typeof getViewsByDayChartData>[0]
 ) {
-    // const chartData = await getViewsByDayChartData(props)
+    const chartData = await getViewsByDayChartData(props)
 
     return (
         <Card>
@@ -47,7 +48,7 @@ async function ViewsByDayCard(
                 <CardTitle>Visitors Per Day</CardTitle>
             </CardHeader>
             <CardContent>
-                {/* <ViewsByDayChart chartData={chartData} /> */}
+                <ViewsByDayChart chartData={chartData} />
             </CardContent>
         </Card>
     )
