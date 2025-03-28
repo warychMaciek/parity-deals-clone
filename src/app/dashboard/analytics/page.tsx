@@ -6,6 +6,13 @@ import { auth } from "@clerk/nextjs/server"
 import { ViewsByCountryChart } from "../_components/charts/ViewsByCountryChart"
 import { ViewsByPPPChart } from "../_components/charts/ViewsByPPPChart"
 import { ViewsByDayChart } from "../_components/charts/ViewsByDayChart"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { ChevronDown } from "lucide-react"
+import Link from "next/link"
+import { createURL } from "@/lib/utils"
+import { getProducts } from "@/server/db/products"
+import { TimezoneDropdownMenuItem } from "../_components/TimezoneDropdownMenuItem"
 
 export default async function AnalyticsPage({
     searchParams
@@ -25,7 +32,51 @@ export default async function AnalyticsPage({
 
     return (
         <>
-            <h1 className="text-3xl font-semibold">Analytics</h1>
+            <div className="mb-6 flex items-baseline justify-between">
+                <h1 className="text-3xl font-semibold">Analytics</h1>
+                <HasPermission permission={canAccessAnalytics}>
+                    <div className="flex gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    {interval.label}
+                                    <ChevronDown className="size-4 ml-2" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {Object.entries(CHART_INTERVALS).map(([key, value]) => (
+                                    <DropdownMenuItem asChild key={key}>
+                                        <Link href={createURL("/dashboard/analytics", searchParams, { interval: key })}>
+                                            {value.label}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <ProductDropdown 
+                            userId={userId} 
+                            selectedProductId={productId} 
+                            searchParams={searchParams}
+                        />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    {timezone}
+                                    <ChevronDown className="size-4 ml-2" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem asChild>
+                                    <Link href={createURL("/dashboard/analytics", searchParams, { timezone: "UTC" })}>
+                                        UTC
+                                    </Link>
+                                </DropdownMenuItem>
+                                <TimezoneDropdownMenuItem searchParams={searchParams} />
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </HasPermission>
+            </div>
             <HasPermission permission={canAccessAnalytics} renderFallback>
                 <div className="flex flex-col gap-8">
                     <ViewsByDayCard interval={interval} timezone={timezone} userId={userId} productId={productId} />
@@ -34,6 +85,43 @@ export default async function AnalyticsPage({
                 </div>
             </HasPermission>
         </>
+    )
+}
+
+async function ProductDropdown({
+    userId,
+    selectedProductId,
+    searchParams
+}: {
+    userId: string,
+    selectedProductId?: string,
+    searchParams: Record<string, string>
+}) {
+    const products = await getProducts(userId)
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    {products.find(product => product.id === selectedProductId)?.name || "All Products"}
+                    <ChevronDown className="size-4 ml-2" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                    <Link href={createURL("/dashboard/analytics", searchParams, { productId: undefined })}>
+                        All Products
+                    </Link>
+                </DropdownMenuItem>
+                {products.map(product => (
+                    <DropdownMenuItem asChild key={product.id}>
+                        <Link href={createURL("/dashboard/analytics", searchParams, { productId: product.id })}>
+                            {product.name}
+                        </Link>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
     )
 }
 
